@@ -5,17 +5,9 @@ import (
 	"fmt"
 	"os"
 	"flag"
-	"runtime/debug"
 	)
 
 
-func assert(b bool) {
-	if !b {
-		fmt.Println("Assertion error!")
-		debug.PrintStack()
-		os.Exit(-1)
-	}
-}
 
 
 func main() {
@@ -26,9 +18,12 @@ func main() {
 	flag.BoolVar(&addZfecHeader,"zfecheader",true,"true if you want to add a header compatible with the zfec command line tool")
 	flag.Parse()
 	filenames := flag.Args()
-	if len(filenames) 
+	if len(filenames) == 0 {
+		fmt.Println("At least one filename required on the command line to encode.")
+		os.Exit(-1)
+	}
 	jf := jfec.NewFec(uint8(k),uint8(m))
-	for fn := range filenames {
+	for _,fn := range filenames {
 		fmt.Printf("Encoding file %s...\n",fn)
 		jf.Encode_files(fn,addZfecHeader)
 	}

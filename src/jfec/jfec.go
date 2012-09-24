@@ -489,25 +489,21 @@ func gen_header(code *Fec,padding, num uint) []byte {
 	val := uint(0)
 	val = val | (m-1)
 	bitsused += 8 // first 8 bits aways encode m
-	fmt.Printf("[a] val=%08x  bitsused=%d\n",val,bitsused)
 
 	kbits := log_ceil(m,2) // number of bits needed to store all possible values of k
 	val <<= kbits
 	bitsused += kbits
 	val = val | (k-1)
-	fmt.Printf("[b] val=%08x  bitsused=%d\n",val,bitsused)
 
 	padbits := log_ceil(k,2) // num bits needed to store all possible values of pad
 	val <<= padbits
 	bitsused += padbits
 	val = val | padding
-	fmt.Printf("[c] val=%08x  bitsused=%d  padding=%d\n",val,bitsused,padding)
 
 	shnumbits := log_ceil(m,2) //num bits needed to store all possible values of shnum
 	val <<= shnumbits
 	bitsused += shnumbits
 	val = val | num 
-	fmt.Printf("[d] val=%08x  bitsused=%d  num=%d\n",val,bitsused,num)
 
 	assert(bitsused >= 8)
 	assert(bitsused <= 32)
@@ -517,20 +513,17 @@ func gen_header(code *Fec,padding, num uint) []byte {
 		val <<= (16-bitsused)
 		err := binary.Write(buf,binary.BigEndian, uint32(val))
 		if err != nil {	fmt.Println("binary.Write failed:", err)  }
-		fmt.Printf("header: % x\n",buf.Bytes())
 		return buf.Bytes()[2:4]
 	case bitsused <= 24 :
 		val <<= (24-bitsused)
 		err := binary.Write(buf,binary.BigEndian, uint32(val))
 		if err != nil {	fmt.Println("binary.Write failed:", err)  }
-		fmt.Printf("header: % x\n",buf.Bytes())
 		return buf.Bytes()[1:4]
 	}
 	// default to 32-bit
 	val <<= (32-bitsused)
 	err := binary.Write(buf,binary.BigEndian, uint32(val))
 	if err != nil {	fmt.Println("binary.Write failed:", err)  }
-	fmt.Printf("header: % x\n",buf.Bytes())
 	return buf.Bytes()[0:4]
 }
 
@@ -556,7 +549,7 @@ func (code *Fec) Encode_files(baseFilename string, addZfecHeader bool) {
 			outfiles[i].Write(gen_header(code,padding,uint(i)))
 		}
 	}
-	Encode_buffers(code, bufio.NewReader(infile), outfiles, insz)
+	code.Encode_buffers(bufio.NewReader(infile), outfiles, insz)
 	// lets make sure everything is written to disk before we move on...
 	for _,wr := range outfiles {
 		wr.Flush()
